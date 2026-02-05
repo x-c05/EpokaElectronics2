@@ -98,14 +98,14 @@ EpokaElectronics
 ## How to Run the Project
 
 1. Open terminal in EpokaElectronics.Api
-2. Edit appsettings.json and change the JWT key
+2. Go into: EpokaElectronics/EpokaElectronics.Api
 3. Run:
    dotnet restore
    dotnet run
 4. Open in browser:
    https://localhost:7182
 
-
+  
 
 ## Demo Admin Account
 
