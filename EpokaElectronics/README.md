@@ -1,7 +1,9 @@
 
 # Epoka Electronics
 
-**Epoka Electronics** is an e-commerce web application developed as a project. It is an online electronics store where users can browse products, add them to a cart, place orders, and where the admin can manage the catalog and orders through the admin dashboard.
+**Epoka Electronics**
+
+ Epoka Electronins an e-commerce web application. It is an online electronics store where users can browse products, add them to a cart, place orders, and where the admin can manage the catalog and orders through the admin dashboard.
 
 ## This project was built using:
 
@@ -111,6 +113,3 @@ EpokaElectronics
 - Password: Admin123!
 
 
-## Conclusion
-
-Epoka Electronics demonstrates how a professional e-commerce system can be built using pure HTML, CSS, JavaScript, and ASP.NET Web API, combining frontend design, backend logic, database management, and authentication into a complete, functional web application.
