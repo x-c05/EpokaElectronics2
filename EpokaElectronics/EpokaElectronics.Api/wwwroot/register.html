@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Create account · Epoka Electronics</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="container">
+      <div class="nav">
+        <a class="brand" href="/">
+          <img class="logo" src="/assets/logo/Epoka Electronics.png" alt="">
+          <div>Epoka Electronics</div>
+        </a>
+        <div class="nav-actions">
+          <a class="btn secondary" href="/cart.html">Cart <span class="badge" data-cartcount>0</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="padding:18px 0 34px">
+    <div class="card form" style="max-width:520px; margin:0 auto">
+      <h2 style="margin:0 0 10px">Create account</h2>
+      <div class="label">Full name</div>
+      <input class="textbox" id="name" placeholder="Your name" />
+      <div class="label">Email</div>
+      <input class="textbox" id="email" placeholder="you@example.com" />
+      <div class="label">Password</div>
+      <input class="textbox" id="password" type="password" placeholder="At least 6 characters" />
+      <button class="btn" id="register" style="width:100%; margin-top:12px">Create</button>
+      <a class="btn secondary" href="/login.html" style="display:block; text-align:center; margin-top:10px">I already have an account</a>
+    </div>
+  </div>
+
+  <div class="toast"></div>
+  <script src="/js/app.js"></script>
+  <script>
+    document.getElementById("register").onclick = async () => {
+      const payload = {
+        fullName: document.getElementById("name").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        password: document.getElementById("password").value
+      };
+      try {
+        const res = await Api.register(payload);
+        Api.setSession(res);
+        Ui.toast("Account created", res.email);
+        setTimeout(() => location.href = "/", 700);
+      } catch (e) {
+        Ui.toast("Registration failed", e.message);
+      }
+    };
+  </script>
+</body>
+</html>

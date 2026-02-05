@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cart · Epoka Electronics</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="container">
+      <div class="nav">
+        <a class="brand" href="/">
+          <img class="logo" src="/assets/logo/Epoka Electronics.png" alt="">
+          <div>Epoka Electronics</div>
+        </a>
+        <div class="nav-actions">
+          <a class="btn secondary" href="/">Shop</a>
+          <div data-account></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="padding:18px 0 34px">
+    <div class="two">
+      <div class="card" style="padding:18px">
+        <h2 style="margin:0 0 10px">Cart</h2>
+        <div id="empty" class="notice" style="display:none">Your cart is empty.</div>
+        <table class="table" id="table" style="display:none">
+          <thead>
+            <tr>
+              <th align="left">Item</th>
+              <th align="right">Price</th>
+              <th align="center">Qty</th>
+              <th align="right">Total</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <div style="display:flex; gap:10px; margin-top:12px">
+          <button class="btn danger" id="clear">Clear cart</button>
+          <a class="btn secondary" href="/">Continue shopping</a>
+        </div>
+      </div>
+
+      <div class="card form">
+        <h2 style="margin:0 0 10px">Checkout</h2>
+        <div class="notice" id="mustLogin" style="display:none">Please login to place an order.</div>
+
+        <div class="label">Full name</div>
+        <input class="textbox" id="name" placeholder="Your full name" />
+
+        <div class="label">Phone</div>
+        <input class="textbox" id="phone" placeholder="+355 ..." />
+
+        <div class="label">Address line 1</div>
+        <input class="textbox" id="a1" placeholder="Street and number" />
+
+        <div class="label">Address line 2</div>
+        <input class="textbox" id="a2" placeholder="Apartment, suite, etc. (optional)" />
+
+        <div class="row">
+          <div>
+            <div class="label">City</div>
+            <input class="textbox" id="city" placeholder="Tirana" />
+          </div>
+          <div>
+            <div class="label">Country</div>
+            <input class="textbox" id="country" placeholder="Albania" value="Albania" />
+          </div>
+        </div>
+
+        <div class="label">Notes</div>
+        <input class="textbox" id="notes" placeholder="Optional delivery notes" />
+
+        <div class="notice" style="margin-top:12px">
+          <div style="display:flex; justify-content:space-between">
+            <span>Subtotal</span><b id="subtotal">€0.00</b>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-top:6px">
+            <span>Shipping</span><b id="shipping">€0.00</b>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-top:6px">
+            <span>Total</span><b id="total">€0.00</b>
+          </div>
+        </div>
+
+        <button class="btn" id="place" style="width:100%; margin-top:12px">Place order</button>
+        <a class="btn secondary" href="/orders.html" style="display:block; text-align:center; margin-top:10px">My orders</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast"></div>
+  <script src="/js/app.js"></script>
+  <script>
+    function compute(items) {
+      const subtotal = items.reduce((a,i) => a + (i.price * i.quantity), 0);
+      const shipping = subtotal >= 150 ? 0 : (subtotal > 0 ? 5 : 0);
+      return { subtotal, shipping, total: subtotal + shipping };
+    }
+
+    function render() {
+      const items = Ui.cart();
+      const empty = document.getElementById("empty");
+      const table = document.getElementById("table");
+      const rows = document.getElementById("rows");
+
+      const sums = compute(items);
+      document.getElementById("subtotal").textContent = Ui.money(sums.subtotal);
+      document.getElementById("shipping").textContent = Ui.money(sums.shipping);
+      document.getElementById("total").textContent = Ui.money(sums.total);
+
+      if (!items.length) {
+        empty.style.display = "block";
+        table.style.display = "none";
+        rows.innerHTML = "";
+        return;
+      }
+
+      empty.style.display = "none";
+      table.style.display = "table";
+
+      rows.innerHTML = items.map(i => `
+        <tr>
+          <td class="cell">
+            <div style="display:flex; gap:10px; align-items:center">
+              <img src="${i.imageUrl || "/assets/products/phone-1.svg"}" style="width:56px;height:42px;object-fit:cover;border-radius:10px;border:1px solid rgba(255,255,255,.08)">
+              <div>
+                <div style="font-weight:800">${Ui.escapeHtml(i.name)}</div>
+                <div class="muted" style="font-size:12px">Product ID: ${i.productId}</div>
+              </div>
+            </div>
+          </td>
+          <td class="cell" align="right">${Ui.money(i.price)}</td>
+          <td class="cell" align="center">
+            <input class="textbox" data-qty="${i.productId}" type="number" min="1" value="${i.quantity}" style="max-width:110px; text-align:center">
+          </td>
+          <td class="cell" align="right"><b>${Ui.money(i.price * i.quantity)}</b></td>
+          <td class="cell" align="right">
+            <button class="btn danger" data-del="${i.productId}">Remove</button>
+          </td>
+        </tr>
+      `).join("");
+
+      rows.querySelectorAll("[data-del]").forEach(b => {
+        b.onclick = () => { Ui.removeFromCart(parseInt(b.getAttribute("data-del"))); render(); };
+      });
+
+      rows.querySelectorAll("[data-qty]").forEach(inp => {
+        inp.onchange = () => {
+          Ui.updateQty(parseInt(inp.getAttribute("data-qty")), parseInt(inp.value || "1"));
+          render();
+        };
+      });
+    }
+
+    document.getElementById("clear").onclick = () => { Ui.clearCart(); render(); };
+
+    document.getElementById("place").onclick = async () => {
+      const items = Ui.cart();
+      if (!items.length) { Ui.toast("Cart empty", "Add some products first."); return; }
+
+      const sess = Api.session();
+      document.getElementById("mustLogin").style.display = sess ? "none" : "block";
+      if (!sess) { Ui.toast("Login required", "Please login to place an order."); return; }
+
+      const payload = {
+        shippingName: document.getElementById("name").value.trim(),
+        shippingPhone: document.getElementById("phone").value.trim(),
+        shippingAddressLine1: document.getElementById("a1").value.trim(),
+        shippingAddressLine2: document.getElementById("a2").value.trim() || null,
+        shippingCity: document.getElementById("city").value.trim(),
+        shippingCountry: document.getElementById("country").value.trim(),
+        notes: document.getElementById("notes").value.trim() || null,
+        items: items.map(i => ({ productId: i.productId, quantity: i.quantity }))
+      };
+
+      try {
+        const order = await Api.createOrder(payload);
+        Ui.clearCart();
+        Ui.toast("Order placed", `Order #${order.id} created successfully.`);
+        setTimeout(() => location.href = "/orders.html", 800);
+      } catch (e) {
+        Ui.toast("Checkout failed", e.message);
+      }
+    };
+
+    render();
+  </script>
+</body>
+</html>
